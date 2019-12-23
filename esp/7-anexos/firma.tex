@@ -1,0 +1,42 @@
+\subsection{Creación de la firma ECDA}
+
+\noindent El algoritmo ECDSA de firmado, tomo como input un mensaje \textit{msj} y una llave privada \textit{privKey}, y produce como resultado una firma, que consiste en un par de enteros \textit{\{r, s}\}.
+El algoritmo de firmado ECDSA, está basado en el esquema de firmas El¨Gamal y funciona de la siguiente forma:
+
+
+\begin{enumerate}
+\item Calcula el hash del mensaje, utilizando una función criptográfica como: \[SHA-256: h = hash(msg) \]
+\item Genera de forma segura un número aleatorio \textit{k} en el rango \([1...n-1]\). 
+\item Calcula un punto al azar \( R = k * G\). Y toma:
+ \[ x-coordenada: r = R.x \]
+\item Calcula la prueba de la firma:
+  \[  s = k^{-1} * (h + r * privKey)\pmod{n} \]
+  El modular inverso \( k^{-1} \pmod{n}\) es un entero tal que: 
+  \[ k * k^{-1} \equiv 1 \pmod{n}\]
+\item Retorna la firma \{r,s\}.
+\end{enumerate}
+
+\noindent La firma calculada \{r,s\}, es un par de enteros cada uno en el rango \([1...n-1]\). Codifica un punto al azar \( R = k * G\), junto con una prueba \textit{s}, confirmando que el firmante conoce el mensaje \textit{h}, y la llave privada \textit{privKey}. La prueba \textit{s}, es en teoría verificable usando la llave pública \textit{pubKey} correspondiente.
+
+\bigskip
+\subsection{Verificación de la firma}
+
+El algoritmo de verificación de firmas, toma como input un mensaje firmado + la firma \{r,s\}, producida por el algoritmo de firma + la llave pública \textit{pubKey}, correspondiente a la llave privada del firmante. El resultado es un booleano que representa si la firma es válida o no. A continuación se detalla el proceso: 
+
+\begin{enumerate}
+\item Calcula el hash del mensaje, con la misma función usado durante el firmado del mensaje:
+ \[SHA-256: h = hash(msg) \]
+\item Calcula el modular inverso de la prueba de firma
+\[s1 = s^{-1} \pmod n \]
+\item Recupera un punto al azar usado durante la firma
+\[R' = (h * s1) * G + (r * s1) * pubKey \]
+ Y toma:
+ \[ x-coordenada: r' = R'.x \]
+ \item Calcula la validación de la firma comparando \(r' == r\)
+
+ \end{enumerate}
+
+\bigskip
+\subsection{Explicación simplificada}
+
+\noindent El firmante codifica un punto random, representado solo por su coordenada en el eje x, a través de transformaciones de curva elíptica usando una llave privada y el hash del mensaje, en un número s, el cual es la prueba de que el firmante conoce la llave privada. La firma no puede revelar la llave privada debido a la dificultad del problema ECDLP. La verificación de la firma decodifica el número s, entregando de vuelta el punto del eje x, ocupando para esto una llave pública y el hash del mensaje, de esta forma compara si ambos puntos r coinciden \cite{ECDA}.
